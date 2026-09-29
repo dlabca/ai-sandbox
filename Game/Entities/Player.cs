@@ -54,20 +54,22 @@ namespace AISandbox.Game.Entities
             }
 
             verticalVelocity += Gravity;
-            Position.Y += verticalVelocity;
+            Position = new Vector3(Position.X, Position.Y + verticalVelocity, Position.Z);
 
             Vector3 groundCheck = Position - Vector3.Up * 1.7f;
             Block groundBlock = world.GetBlock(groundCheck);
             
             if (groundBlock.IsActive)
             {
-                Position.Y = groundBlock.Position.Y + 2.7f;
+                Position = new Vector3(Position.X, groundBlock.Position.Y + 2.7f, Position.Z);
                 verticalVelocity = 0;
                 isJumping = false;
             }
 
-            Position.X = MathHelper.Clamp(Position.X, 0, 49);
-            Position.Z = MathHelper.Clamp(Position.Z, 0, 29);
+            Position = new Vector3(
+                MathHelper.Clamp(Position.X, 0, 49),
+                Position.Y,
+                MathHelper.Clamp(Position.Z, 0, 29));
         }
 
         public Block MineBlock(WorldManager world)
