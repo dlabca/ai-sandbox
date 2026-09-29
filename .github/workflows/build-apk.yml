@@ -1,0 +1,52 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+      - "ci/**"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Install Android workload
+        run: dotnet workload install android
+
+      - name: Restore dependencies
+        run: dotnet restore AISandbox.csproj
+
+      - name: Build APK
+        run: >
+          dotnet publish AISandbox.csproj
+          --configuration Release
+          --framework net8.0-android
+          --runtime android-arm64
+          --self-contained true
+          -p:AndroidPackageFormat=apk
+          -p:AndroidKeyStore=false
+          --output ./artifacts
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-sandbox-apk
+          path: ./artifacts/**/*.apk
+          if-no-files-found: error
