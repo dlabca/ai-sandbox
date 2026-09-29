@@ -1,35 +1,35 @@
-# Build results
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-bin/
-obj/
+# Rider IDE
+.idea/
+*.sln.iml
+
+# Visual Studio
 .vs/
 .vscode/
+*.user
+*.suo
+*.sln.DotSettings
+
+# Build results
+bin/
+obj/
+dist/
 
 # MonoGame
-*.mgcb
-*.ContentProject
 Content/obj/
 
-# Android
-.gradle/
-build/
-*.apk
-*.aab
-local.properties
-.android/
+# OS
+.DS_Store
+Thumbs.db
 
-# User-specific files
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
+# Dependencies
+packages/
+.nuget/
 
-# IDEs
-.idea/
+# Editor backups
+*~
 *.swp
 *.swo
-*~
-.DS_Store
+
+# Environment
+.env
+.env.local

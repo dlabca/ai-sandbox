@@ -17,7 +17,7 @@ namespace AISandbox.Game
         public Camera(GraphicsDevice device)
         {
             graphicsDevice = device;
-            Position = new Vector3(0, 10, -15);
+            Position = new Vector3(0, 15, -20);
             Target = Vector3.Zero;
             Up = Vector3.Up;
             UpdateMatrices();
@@ -25,8 +25,8 @@ namespace AISandbox.Game
 
         public void Update(Vector3 playerPosition, GraphicsDevice device)
         {
-            Position = playerPosition + new Vector3(0, 8, -12);
-            Target = playerPosition + Vector3.Up * 2;
+            Position = playerPosition + new Vector3(5, 10, -15);
+            Target = playerPosition + Vector3.Up * 3;
             UpdateMatrices();
         }
 

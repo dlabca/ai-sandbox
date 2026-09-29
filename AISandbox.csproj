@@ -1,16 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0-android</TargetFramework>
-    <OutputType>Exe</OutputType>
-    <RuntimeIdentifier>android-arm64</RuntimeIdentifier>
-    <UseInterpreter>true</UseInterpreter>
-    <PublishTrimmed>false</PublishTrimmed>
-    <TrimMode>link</TrimMode>
-    <AndroidPackageFormat>apk</AndroidPackageFormat>
-    <AndroidKeyStore>false</AndroidKeyStore>
-    <AndroidVersion>33</AndroidVersion>
-    <TargetAndroidVersion>33</TargetAndroidVersion>
-    <AssemblyName>ai-sandbox</AssemblyName>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <UseWindowsForms>false</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>AISandbox</AssemblyName>
     <RootNamespace>AISandbox</RootNamespace>
   </PropertyGroup>
 
@@ -20,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Content\" />
+    <Folder Include="Content" />
   </ItemGroup>
-
 </Project>
