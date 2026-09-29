@@ -46,15 +46,17 @@ namespace AISandbox.Game.Entities
             
             if (groundBlock.IsActive)
             {
-                Position.Y = groundBlock.Position.Y + 1;
+                Position = new Vector3(Position.X, groundBlock.Position.Y + 1, Position.Z);
             }
             else
             {
-                Position.Y -= 0.1f;
+                Position = new Vector3(Position.X, Position.Y - 0.1f, Position.Z);
             }
 
-            Position.X = MathHelper.Clamp(Position.X, 0, 49);
-            Position.Z = MathHelper.Clamp(Position.Z, 0, 29);
+            Position = new Vector3(
+                MathHelper.Clamp(Position.X, 0, 49),
+                Position.Y,
+                MathHelper.Clamp(Position.Z, 0, 29));
         }
 
         public void Draw(GraphicsDevice device, Camera camera)
