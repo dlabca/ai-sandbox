@@ -37,7 +37,7 @@ jobs:
         run: >
           dotnet publish AISandbox.csproj
           --configuration Release
-          --framework net8.0-android
+          --framework net9.0-android
           --runtime android-arm64
           --self-contained true
           -p:AndroidPackageFormat=apk
