@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <RuntimeIdentifier>android-arm64</RuntimeIdentifier>
     <UseInterpreter>true</UseInterpreter>
-    <PublishTrimmed>false</PublishTrimmed>
+    <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>link</TrimMode>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <AndroidKeyStore>false</AndroidKeyStore>
