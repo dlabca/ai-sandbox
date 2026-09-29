@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-android</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <RuntimeIdentifier>android-arm64</RuntimeIdentifier>
+    <UseInterpreter>true</UseInterpreter>
+    <PublishTrimmed>false</PublishTrimmed>
+    <TrimMode>link</TrimMode>
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
+    <AndroidKeyStore>false</AndroidKeyStore>
+    <AndroidVersion>33</AndroidVersion>
+    <TargetAndroidVersion>33</TargetAndroidVersion>
+    <AssemblyName>ai-sandbox</AssemblyName>
+    <RootNamespace>AISandbox</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.29" />
+    <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.29" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Content\" />
+  </ItemGroup>
+
+</Project>
