@@ -8,7 +8,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      workflows: write
 
     steps:
       - name: Checkout repository
@@ -16,15 +15,9 @@ jobs:
 
       - name: Unzip and sync contents
         run: |
-          if [ ! -f "ai-sandbox-lowpoly.zip" ]; then
-            echo "::error::Soubor ai-sandbox-lowpoly.zip nebyl v repozitáři nalezen."
-            exit 1
-          fi
-
           mkdir -p /tmp/extracted
           unzip -q ai-sandbox-lowpoly.zip -d /tmp/extracted
 
-          # Pokud ZIP obsahuje právě jednu obalovací složku, posuneme se do ní
           SUBDIRS=(/tmp/extracted/*)
           if [ ${#SUBDIRS[@]} -eq 1 ] && [ -d "${SUBDIRS[0]}" ]; then
             SRC="${SUBDIRS[0]}/"
@@ -32,9 +25,10 @@ jobs:
             SRC="/tmp/extracted/"
           fi
 
-          # rsync bezpečně přenese vše včetně skrytých souborů
           rsync -a "$SRC" "$GITHUB_WORKSPACE/"
 
+          # Odstranění nového workflow souboru ze ZIPu, aby ho GITHUB_TOKEN neblokoval
+          rm -rf "$GITHUB_WORKSPACE/.github/workflows/build-apk.yml"
           rm -f "$GITHUB_WORKSPACE/ai-sandbox-lowpoly.zip"
 
       - name: Commit and push changes
