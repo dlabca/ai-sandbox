@@ -1,0 +1,35 @@
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+bin/
+obj/
+.vs/
+.vscode/
+
+# MonoGame
+*.mgcb
+*.ContentProject
+Content/obj/
+
+# Android
+.gradle/
+build/
+*.apk
+*.aab
+local.properties
+.android/
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# IDEs
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
