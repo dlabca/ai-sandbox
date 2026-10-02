@@ -1,0 +1,42 @@
+name: Unzip and Extract Contents
+
+on:
+  workflow_dispatch:
+
+jobs:
+  unzip-and-extract:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Unzip file
+        run: |
+          unzip -q ai-sandbox-lowpoly.zip -d /tmp/extracted
+
+      - name: Find and extract inner folder contents
+        run: |
+          cd /tmp/extracted
+
+          folders=$(find . -maxdepth 1 -type d ! -name '.' | head -1)
+
+          if [ -n "$folders" ]; then
+            echo "Found folder: $folders"
+            cp -r "$folders"/* "$GITHUB_WORKSPACE/"
+          else
+            cp -r * "$GITHUB_WORKSPACE/" 2>/dev/null || true
+          fi
+
+      - name: Remove ZIP file
+        run: rm -f ai-sandbox-lowpoly.zip
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git commit -m "Extract ai-sandbox-lowpoly contents to repository root" || echo "Nothing to commit"
+          git push
