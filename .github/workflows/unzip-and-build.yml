@@ -1,7 +1,7 @@
 name: Build APK ze zipu
 
 on:
-  push:
+   push:
       paths: ['upload/*.zip']
         workflow_dispatch:
 
