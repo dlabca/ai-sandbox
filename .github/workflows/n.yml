@@ -1,0 +1,135 @@
+name: Build APK ze zipu
+
+on:
+  push:
+    paths:
+      - "upload/*.zip"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Rozbalit zip
+        run: |
+          ZIP=$(git diff-tree --root --no-commit-id --name-only -r HEAD | grep '^upload/.*\.zip$' | head -1 || true)
+          if [ -z "$ZIP" ]; then
+            ZIP=$(ls -t upload/*.zip 2>/dev/null | head -1 || true)
+          fi
+          if [ -z "$ZIP" ]; then
+            echo "::error::Ve slozce upload/ neni zadny zip"
+            exit 1
+          fi
+          echo "Zip: $ZIP"
+          mkdir work
+          unzip -q "$ZIP" -d work
+
+      - name: Detekovat typ projektu
+        run: |
+          GRADLE_SETTINGS=$(find work \( -name 'settings.gradle.kts' -o -name 'settings.gradle' \) | head -1 || true)
+          if [ -n "$GRADLE_SETTINGS" ]; then
+            echo "TYPE=gradle" >> $GITHUB_ENV
+            echo "GRADLE_DIR=$(dirname "$GRADLE_SETTINGS")" >> $GITHUB_ENV
+            echo "Gradle projekt: $(dirname "$GRADLE_SETTINGS")"
+            exit 0
+          fi
+
+          CSPROJ=""
+          while IFS= read -r f; do
+            if grep -qi 'android' "$f" && grep -qi '<OutputType>Exe' "$f"; then
+              CSPROJ="$f"; break
+            fi
+          done < <(find work -name '*.csproj')
+          if [ -z "$CSPROJ" ]; then
+            while IFS= read -r f; do
+              if grep -qiE 'net[0-9]+\.0-android' "$f" && ! grep -qi '<OutputType>Library' "$f"; then
+                CSPROJ="$f"; break
+              fi
+            done < <(find work -name '*.csproj')
+          fi
+          if [ -z "$CSPROJ" ]; then
+            echo "::error::Android projekt nenalezen (ani Gradle, ani .csproj)"
+            exit 1
+          fi
+          TFM=$(grep -oiE 'net[0-9]+\.0-android[0-9.]*' "$CSPROJ" | head -1 | tr 'A-Z' 'a-z' || true)
+          [ -z "$TFM" ] && TFM=net8.0-android
+          VER=$(echo "$TFM" | sed -E 's/^net([0-9]+)\..*/\1/')
+          echo "Projekt: $CSPROJ (TFM $TFM)"
+          echo "TYPE=dotnet" >> $GITHUB_ENV
+          echo "CSPROJ=$CSPROJ" >> $GITHUB_ENV
+          echo "TFM=$TFM" >> $GITHUB_ENV
+          echo "DOTNET_VER=$VER" >> $GITHUB_ENV
+
+      # ---------- Gradle (Kotlin/Java) ----------
+      - uses: gradle/actions/setup-gradle@v4
+        if: env.TYPE == 'gradle'
+        with:
+          gradle-version: 8.7
+
+      - name: Build (Gradle)
+        if: env.TYPE == 'gradle'
+        run: |
+          cd "$GRADLE_DIR"
+          if [ -f gradlew ]; then
+            chmod +x gradlew
+            ./gradlew assembleDebug --no-daemon
+          else
+            gradle assembleDebug --no-daemon
+          fi
+
+      # ---------- .NET Android ----------
+      - uses: actions/setup-dotnet@v4
+        if: env.TYPE == 'dotnet'
+        with:
+          dotnet-version: ${{ env.DOTNET_VER }}.0.x
+
+      - name: Build (.NET)
+        if: env.TYPE == 'dotnet'
+        run: |
+          dotnet workload install android
+          cd "$(dirname "$CSPROJ")"
+          dotnet tool restore || true
+          keytool -genkey -v -keystore debug.keystore -alias app \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass android -keypass android -dname "CN=Dev"
+          dotnet publish "$(basename "$CSPROJ")" -c Release -f "$TFM" \
+            -p:AndroidPackageFormat=apk \
+            -p:AcceptAndroidSDKLicenses=True \
+            -p:AndroidKeyStore=true \
+            -p:AndroidSigningKeyStore="$PWD/debug.keystore" \
+            -p:AndroidSigningKeyAlias=app \
+            -p:AndroidSigningKeyPass=android \
+            -p:AndroidSigningStorePass=android
+
+      - name: Release s APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          APK=""
+          if [ "$TYPE" = "gradle" ]; then
+            APK=$(find work -path '*outputs/apk*' -name '*.apk' | head -1 || true)
+          else
+            APK=$(find work -name '*-Signed.apk' | head -1 || true)
+            if [ -z "$APK" ]; then
+              APK=$(find work -path '*Release*' -name '*.apk' | head -1 || true)
+            fi
+          fi
+          if [ -z "$APK" ]; then
+            echo "::error::APK nenalezeno. Obsah bin/build:"
+            find work \( -path '*bin*' -o -path '*build/outputs*' \) -type f | head -50
+            exit 1
+          fi
+          echo "APK: $APK"
+          gh release create "build-${{ github.run_number }}" "$APK" --title "Build ${{ github.run_number }}" --notes "APK ze zipu"
