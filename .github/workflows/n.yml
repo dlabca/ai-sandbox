@@ -21,10 +21,10 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-
       - name: Rozbalit zip
         run: |
-          ZIP=$(git diff-tree --root --no-commit-id --name-only -r HEAD | grep '^upload/.*\.zip$' | head -1 || true)
+          ZIP=$(git diff-tree --root --no-commit-id --name-only --diff-filter=AM -r HEAD | grep '^upload/.*\.zip$' | head -1 || true)
+          if [ -n "$ZIP" ] && [ ! -f "$ZIP" ]; then ZIP=""; fi
           if [ -z "$ZIP" ]; then
             ZIP=$(ls -t upload/*.zip 2>/dev/null | head -1 || true)
           fi
