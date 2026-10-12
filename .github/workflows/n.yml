@@ -21,6 +21,7 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+
       - name: Rozbalit zip
         run: |
           ZIP=$(git diff-tree --root --no-commit-id --name-only --diff-filter=AM -r HEAD | grep '^upload/.*\.zip$' | head -1 || true)
@@ -132,4 +133,5 @@ jobs:
             exit 1
           fi
           echo "APK: $APK"
-          gh release create "build-${{ github.run_number }}" "$APK" --title "Build ${{ github.run_number }}" --notes "APK ze zipu"
+          TAG="build-${{ github.run_number }}-${{ github.run_attempt }}"
+          gh release create "$TAG" "$APK" --title "Build ${{ github.run_number }}.${{ github.run_attempt }}" --notes "APK ze zipu"
